@@ -2,6 +2,9 @@ import numpy as np
 
 from aniphys.animate import animator
 
+# Prerequisites:
+# - 01_minimal_template.py: basic animator/generate_animation usage and display behavior.
+# - 02_example_animation.py: one parameter changing across frames.
 
 # AniPhys matches keyword arguments by parameter name.
 def equation(x, a=1, b=0):

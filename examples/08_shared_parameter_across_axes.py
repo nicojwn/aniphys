@@ -2,6 +2,9 @@ import numpy as np
 
 from aniphys.animate import animator
 
+# Prerequisites:
+# - 04_how_parameters_work.py: parameter matching by name.
+# - 06_multiple_axes.py: how separate positional equations create separate axes.
 
 # If multiple equations share a parameter name, one keyword drives them all.
 def position(x, t=0):

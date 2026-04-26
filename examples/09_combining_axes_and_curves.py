@@ -2,6 +2,9 @@ import numpy as np
 
 from aniphys.animate import animator
 
+# Prerequisites:
+# - 06_multiple_axes.py: multiple positional equations create multiple axes.
+# - 07_multiple_curves_same_axes.py: lists place multiple curves on one axes.
 
 def sine(x, t=0):
     return np.sin(x - t)

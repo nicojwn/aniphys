@@ -2,6 +2,10 @@ import numpy as np
 
 from aniphys.animate import animator, generate_animation
 
+# Prerequisites:
+# - 01_minimal_template.py: basic animator/generate_animation usage and display behavior.
+# - 02_example_animation.py: default-domain animation with one changing parameter.
+
 """
 This example shows how to animate the function $\sin(kx)$ on the domain $x\in[0,2\pi]$
 as the parameter $k$ increases from $1$ to $10$.
@@ -28,5 +32,4 @@ domain = np.linspace(0, 2 * np.pi, resolution)
 frames = animator(wave, domain=domain, k=parameter_evolution)
 
 
-# Turn the generated frames into a matplotlib animation and show it immediately.
 animation = generate_animation(frames, show=True)

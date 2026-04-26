@@ -2,6 +2,9 @@ import numpy as np
 
 from aniphys.animate import animator
 
+# Prerequisites:
+# - 02_example_animation.py: one animated equation on one axes.
+# - 04_how_parameters_work.py: shared frame-varying parameters.
 
 # Separate positional equations create separate axes.
 def electric_field(x, t=0):

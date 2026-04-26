@@ -2,6 +2,8 @@ import numpy as np
 
 from aniphys.animate import animator
 
+# Prerequisites:
+# - 04_how_parameters_work.py: how AniPhys matches keyword arguments to equation parameters.
 
 # Any parameter passed as an array changes frame by frame.
 def gaussian(x, center=0, width=1):

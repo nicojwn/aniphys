@@ -3,6 +3,9 @@ import numpy as np
 from aniphys.animate import animator, generate_animation
 from aniphys.frame_objects import LegendTracker
 
+# Prerequisites:
+# - 07_multiple_curves_same_axes.py: how AniPhys labels curves within a graph.
+# - 10_editing_figure.py: working with generated frame objects before playback.
 
 def wave(x, k=1):
     return np.sin(k * x)

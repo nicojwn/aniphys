@@ -2,6 +2,9 @@ import numpy as np
 
 from aniphys.animate import animator, generate_animation
 
+# Prerequisites:
+# - 01_minimal_template.py: basic animator/generate_animation usage and display behavior.
+# - 04_how_parameters_work.py: shared frame-varying parameters.
 
 # Group equations in a list when they should share one set of axes.
 def sine(x, t=0):

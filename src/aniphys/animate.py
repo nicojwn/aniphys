@@ -22,6 +22,19 @@ from aniphys.frame_objects import (
 from aniphys.type_defs import ArrayLike1D, Domain
 
 
+def _running_in_notebook() -> bool:
+    try:
+        from IPython import get_ipython
+    except ImportError:
+        return False
+
+    shell = get_ipython()
+    if shell is None:
+        return False
+
+    return shell.__class__.__name__ == "ZMQInteractiveShell"
+
+
 def animator(
     *equations: Callable[..., Any] | list[Callable[..., Any]],
     domain: ArrayLike1D | None = None,
@@ -154,7 +167,7 @@ def _generate_animation(
 
         return changed_artists
 
-    for frame in graph_matrices[1:]:
+    for frame in graph_matrices:
         plt.close(frame.figure)
 
     return FuncAnimation(
@@ -171,7 +184,7 @@ def generate_animation(
     graph_matrices: list[GraphMatrix],
     fps: int = 60,
     suppress_progress_bar: bool = False,
-    show: bool = True,
+    show: bool = False,
 ) -> FuncAnimation:
     if not isinstance(show, bool):
         raise ValueError("show must be a boolean")
@@ -182,8 +195,16 @@ def generate_animation(
         suppress_progress_bar=suppress_progress_bar,
     )
 
-    if show:
+    if _running_in_notebook():
+        plt.close(ani._fig)
+        if show:
+            from IPython.display import display
+
+            display(ani)
+    elif show:
         plt.show()
+    else:
+        plt.close(ani._fig)
 
     return ani
 

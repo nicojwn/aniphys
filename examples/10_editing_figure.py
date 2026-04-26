@@ -2,6 +2,8 @@ import numpy as np
 
 from aniphys.animate import animator, generate_animation
 
+# Prerequisites:
+# - 01_minimal_template.py: basic animator/generate_animation usage and display behavior.
 
 def wave(x, k=1):
     return np.sin(k * x)
