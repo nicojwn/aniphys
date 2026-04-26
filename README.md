@@ -48,8 +48,7 @@ animation = generate_animation(frames, show=True)
 Notebook pattern:
 
 ```python
-animation = generate_animation(frames, show=False)
-animation
+generate_animation(frames)
 ```
 
 ## Example Progression

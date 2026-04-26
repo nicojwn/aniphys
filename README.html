@@ -152,18 +152,44 @@ pip install .
 </code></pre>
 <h2 id="minimal-example">Minimal Example</h2>
 <pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
-<span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
 
-<span class="hljs-keyword">from</span> aniphys <span class="hljs-keyword">import</span> animator, generate_animation
+<span class="hljs-keyword">from</span> aniphys.animate <span class="hljs-keyword">import</span> animator, generate_animation
 
 
 <span class="hljs-keyword">def</span> <span class="hljs-title function_">wave</span>(<span class="hljs-params">x, k=<span class="hljs-number">1</span></span>):
     <span class="hljs-keyword">return</span> np.sin(k * x)
 
 
-frames = animator(wave, k=np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">80</span>))
-ani = generate_animation(frames, show=<span class="hljs-literal">True</span>)
+domain = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, <span class="hljs-number">1000</span>)
+frames = animator(wave, domain=domain, k=np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">80</span>))
+animation = generate_animation(frames, show=<span class="hljs-literal">True</span>)
 </code></pre>
+<h2 id="display-behavior">Display Behavior</h2>
+<ul>
+<li>In a script, <code>generate_animation(..., show=True)</code> opens the animation window.</li>
+<li>In a notebook, prefer <code>show=False</code> and leave the returned animation as the
+last line of the cell.</li>
+<li>If you assign the animation to a variable in a notebook, display it with the
+last line <code>animation</code> or <code>display(animation)</code>.</li>
+</ul>
+<p>Notebook pattern:</p>
+<pre><code class="language-python">generate_animation(frames)
+</code></pre>
+<h2 id="example-progression">Example Progression</h2>
+<ul>
+<li><a href="examples/01_minimal_template.py">01_minimal_template.py</a>: baseline workflow</li>
+<li><a href="examples/02_example_animation.py">02_example_animation.py</a>: one changing parameter</li>
+<li><a href="examples/03_sinkx.py">03_sinkx.py</a>: explicit custom domain</li>
+<li><a href="examples/04_how_parameters_work.py">04_how_parameters_work.py</a>: parameter matching</li>
+<li><a href="examples/05_several_changing_parameters.py">05_several_changing_parameters.py</a>: multiple varying parameters</li>
+<li><a href="examples/06_multiple_axes.py">06_multiple_axes.py</a>: one equation per axes</li>
+<li><a href="examples/07_multiple_curves_same_axes.py">07_multiple_curves_same_axes.py</a>: multiple curves on one axes</li>
+<li><a href="examples/08_shared_parameter_across_axes.py">08_shared_parameter_across_axes.py</a>: shared parameters across graphs</li>
+<li><a href="examples/09_combining_axes_and_curves.py">09_combining_axes_and_curves.py</a>: mixed layout</li>
+<li><a href="examples/10_editing_figure.py">10_editing_figure.py</a>: edit axes before playback</li>
+<li><a href="examples/11_legend_tracker.py">11_legend_tracker.py</a>: animated legends</li>
+</ul>
+<p>The same sequence is available in <a href="examples.ipynb">examples.ipynb</a>.</p>
 <h2 id="documentation">Documentation</h2>
 <ul>
 <li><a href="STUDENT_GUIDE.html">Student Guide</a></li>
