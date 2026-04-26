@@ -13,7 +13,16 @@ if TYPE_CHECKING:
     from .animate import animator, generate_animation
     from .frame_objects import Curve, Graph, GraphMatrix
 
-__all__ = ["Curve", "Graph", "GraphMatrix", "animator", "generate_animation"]
+__all__ = [
+    "animate",
+    "frame_objects",
+    "type_defs",
+    "Curve",
+    "Graph",
+    "GraphMatrix",
+    "animator",
+    "generate_animation",
+]
 
 __version__ = "0.1.0"
 
