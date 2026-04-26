@@ -6,12 +6,12 @@ readme = "README.md"
 authors = [
     { name = "nicojwn", email = "nicolas.nemec@stud.uni-heidelberg.de" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.9"
 dependencies = [
-    "matplotlib>=3.10.8",
-    "numpy>=2.4.4",
-    "scipy>=1.17.1",
-    "tqdm>=4.67.3",
+    "matplotlib",
+    "numpy",
+    "scipy",
+    "tqdm",
 ]
 license = "MIT"
 keywords = ["physics", "animation", "matplotlib", "education"]

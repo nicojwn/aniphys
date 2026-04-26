@@ -35,6 +35,13 @@ def _running_in_notebook() -> bool:
     return shell.__class__.__name__ == "ZMQInteractiveShell"
 
 
+def _cache_animation_html(ani: FuncAnimation, html: str) -> None:
+    def _repr_html_() -> str:
+        return html
+
+    ani._repr_html_ = _repr_html_  # type: ignore[attr-defined]
+
+
 def animator(
     *equations: Callable[..., Any] | list[Callable[..., Any]],
     domain: ArrayLike1D | None = None,
@@ -143,13 +150,15 @@ def _generate_animation(
                 progress_bar.update()
 
         render_progress_bar = tqdm(
-            total=len(frames),
-            desc="Rendering frames",
+            total=len(frames) + 1,
+            desc="Rendering animation",
             ncols=80,
             mininterval=0.1,
             unit="frames",
         )
+        render_progress_bar.refresh()
 
+    xdata_is_constant = _infer_constant_xdata(graph_matrices)
     _apply_global_axis_limits(display_matrix, graph_matrices)
 
     def init_animation() -> tuple[Artist, ...]:
@@ -164,6 +173,14 @@ def _generate_animation(
             for curve in graph.curves:
                 curve.line.set_ydata(np.ma.array(curve.line.get_ydata(), mask=True))
 
+        if (
+            render_progress_bar is not None
+            and render_progress_bar.n < render_progress_bar.total
+        ):
+            render_progress_bar.update()
+            if render_progress_bar.n >= render_progress_bar.total:
+                render_progress_bar.close()
+
         return changed_artists
 
     def animate(frame: GraphMatrix) -> tuple[Artist, ...]:
@@ -172,12 +189,15 @@ def _generate_animation(
         """
         nonlocal render_progress_bar
 
-        _copy_frame_data(display_matrix, frame)
+        _copy_frame_data(display_matrix, frame, xdata_is_constant)
         _copy_legend_labels(display_matrix, frame)
 
-        if render_progress_bar is not None and render_progress_bar.n < len(frames):
+        if (
+            render_progress_bar is not None
+            and render_progress_bar.n < render_progress_bar.total
+        ):
             render_progress_bar.update()
-            if render_progress_bar.n >= len(frames):
+            if render_progress_bar.n >= render_progress_bar.total:
                 render_progress_bar.close()
                 render_progress_bar = None
 
@@ -212,11 +232,15 @@ def generate_animation(
     )
 
     if _running_in_notebook():
-        plt.close(ani._fig)
         if show:
-            from IPython.display import display
+            from IPython.display import HTML, display
 
-            display(ani)
+            html = ani.to_jshtml()
+            _cache_animation_html(ani, html)
+            plt.close(ani._fig)
+            display(HTML(html))
+        else:
+            plt.close(ani._fig)
     elif show:
         plt.show()
     else:
@@ -432,10 +456,43 @@ def _collect_changed_artists(graph_matrix: GraphMatrix) -> tuple[Artist, ...]:
     return tuple(artists)
 
 
-def _copy_frame_data(display_matrix: GraphMatrix, frame: GraphMatrix) -> None:
-    for display_graph, frame_graph in zip(display_matrix.graphs, frame.graphs):
-        for display_curve, frame_curve in zip(display_graph.curves, frame_graph.curves):
-            display_curve.line.set_xdata(frame_curve.line.get_xdata())
+def _infer_constant_xdata(graph_matrices: list[GraphMatrix]) -> list[list[bool]]:
+    reference_matrix = graph_matrices[0]
+    constant_xdata: list[list[bool]] = []
+
+    for graph_idx, reference_graph in enumerate(reference_matrix.graphs):
+        graph_flags: list[bool] = []
+        for curve_idx, reference_curve in enumerate(reference_graph.curves):
+            reference_xdata = np.asarray(reference_curve.line.get_xdata())
+            is_constant = True
+
+            for matrix in graph_matrices[1:]:
+                frame_xdata = np.asarray(
+                    matrix.graphs[graph_idx].curves[curve_idx].line.get_xdata()
+                )
+                if not np.array_equal(reference_xdata, frame_xdata):
+                    is_constant = False
+                    break
+
+            graph_flags.append(is_constant)
+        constant_xdata.append(graph_flags)
+
+    return constant_xdata
+
+
+def _copy_frame_data(
+    display_matrix: GraphMatrix,
+    frame: GraphMatrix,
+    xdata_is_constant: list[list[bool]],
+) -> None:
+    for graph_idx, (display_graph, frame_graph) in enumerate(
+        zip(display_matrix.graphs, frame.graphs)
+    ):
+        for curve_idx, (display_curve, frame_curve) in enumerate(
+            zip(display_graph.curves, frame_graph.curves)
+        ):
+            if not xdata_is_constant[graph_idx][curve_idx]:
+                display_curve.line.set_xdata(frame_curve.line.get_xdata())
             display_curve.line.set_ydata(frame_curve.line.get_ydata())
 
 
