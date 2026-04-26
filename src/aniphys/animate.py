@@ -125,6 +125,7 @@ def _generate_animation(
     frames = graph_matrices[1:] or graph_matrices
 
     changed_artists = _collect_changed_artists(display_matrix)
+    render_progress_bar = None
 
     if suppress_progress_bar:
         for matrix in graph_matrices:
@@ -140,6 +141,14 @@ def _generate_animation(
             for matrix in graph_matrices:
                 matrix.update_graphs()
                 progress_bar.update()
+
+        render_progress_bar = tqdm(
+            total=len(frames),
+            desc="Rendering frames",
+            ncols=80,
+            mininterval=0.1,
+            unit="frames",
+        )
 
     _apply_global_axis_limits(display_matrix, graph_matrices)
 
@@ -161,9 +170,16 @@ def _generate_animation(
         """
         Render a single animation frame.
         """
+        nonlocal render_progress_bar
 
         _copy_frame_data(display_matrix, frame)
         _copy_legend_labels(display_matrix, frame)
+
+        if render_progress_bar is not None and render_progress_bar.n < len(frames):
+            render_progress_bar.update()
+            if render_progress_bar.n >= len(frames):
+                render_progress_bar.close()
+                render_progress_bar = None
 
         return changed_artists
 
