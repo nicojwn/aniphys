@@ -17,6 +17,7 @@ Builds a list of `GraphMatrix` frames from equations and changing parameters.
 ```python
 frames = animator(
     equation,
+    domain=np.linspace(0, 2 * np.pi, 1000),
     parameter=np.linspace(0, 1, 100),
 )
 ```
@@ -25,6 +26,7 @@ Input rules:
 
 - each callable creates one graph with one curve,
 - each list of callables creates one graph with multiple curves,
+- `domain`, if provided, is reused for every generated curve,
 - keyword arrays define frame-by-frame parameter values,
 - scalar keyword values are applied to every frame,
 - all keyword arrays must have the same length.
@@ -49,7 +51,11 @@ frame data copied into that first figure during playback.
 ## Typical Workflow
 
 ```python
-frames = animator(equation, parameter=np.linspace(0, 1, 100))
+frames = animator(
+    equation,
+    domain=np.linspace(0, 2 * np.pi, 1000),
+    parameter=np.linspace(0, 1, 100),
+)
 
 frames[0].graphs[0].axes.set_xlabel("x")
 frames[0].graphs[0].axes.set_ylabel("y")
@@ -57,4 +63,3 @@ frames[0].graphs[0].axes.set_ylabel("y")
 ani = generate_animation(frames)
 plt.show()
 ```
-

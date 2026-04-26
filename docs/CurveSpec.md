@@ -48,7 +48,14 @@ Unknown parameters raise a `ValueError`.
 
 ## Domain
 
-The x-domain is generated from:
+The x-domain can be provided explicitly:
+
+```python
+domain = np.linspace(0, 2 * np.pi, 1000)
+curve = Curve(wave, domain=domain)
+```
+
+or generated from:
 
 - `number_of_grid_points`
 - `step`
@@ -67,4 +74,3 @@ The domain is symmetric around zero and has exactly
 Most users should create curves through `animator(...)`. Use `Curve` directly
 when you need lower-level control over domains, labels, or manual frame
 construction.
-

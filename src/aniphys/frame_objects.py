@@ -78,6 +78,21 @@ def parse_signature(func: Callable[..., Any]) -> FunctionSpec:
     )
 
 
+def _normalize_domain(domain: ArrayLike1D) -> Domain:
+    try:
+        domain_array = np.asarray(domain, dtype=float)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("must be a one-dimensional numeric array-like") from exc
+
+    if domain_array.ndim != 1:
+        raise ValueError("must be one-dimensional")
+
+    if len(domain_array) == 0:
+        raise ValueError("must not be empty")
+
+    return domain_array
+
+
 def _raise_validation_errors(errors: dict[str, str]) -> None:
     if not errors:
         return
@@ -126,12 +141,13 @@ class Curve:
 
     line: Line2D
     number_of_grid_points: int
-    step: Number
+    step: Number | None
     _label: str | None
 
     def __init__(
         self,
         line_equation: LineEquation,
+        domain: ArrayLike1D | None = None,
         number_of_grid_points: int | None = None,
         step: Number | None = None,
         validate_equation: bool = True,
@@ -139,6 +155,7 @@ class Curve:
     ) -> None:
         self._validate_arguments(
             line_equation=line_equation,
+            domain=domain,
             number_of_grid_points=number_of_grid_points,
             step=step,
             validate_equation=validate_equation,
@@ -151,7 +168,11 @@ class Curve:
         self._record_equation_parameter_names(line_equation)
         if validate_equation:
             self._validate_equation_with_dummy_domain()
-        self._init_domain(number_of_grid_points=number_of_grid_points, step=step)
+        self._init_domain(
+            domain=None if domain is None else _normalize_domain(domain),
+            number_of_grid_points=number_of_grid_points,
+            step=step,
+        )
 
         self.line = Line2D(self._domain, [])
         self.label = label
@@ -179,6 +200,7 @@ class Curve:
         **kwargs: Any,
     ) -> None:
         line_equation = kwargs.pop("line_equation", _MISSING)
+        domain = kwargs.pop("domain", _MISSING)
         number_of_grid_points = kwargs.pop("number_of_grid_points", None)
         step = kwargs.pop("step", None)
         validate_equation = kwargs.pop("validate_equation", None)
@@ -189,13 +211,27 @@ class Curve:
         if line_equation is not _MISSING and not callable(line_equation):
             errors["line_equation"] = "must be callable"
 
-        if number_of_grid_points is not None:
+        if domain is not _MISSING and domain is not None:
+            try:
+                _normalize_domain(domain)
+            except ValueError as exc:
+                errors["domain"] = str(exc)
+
+            if number_of_grid_points is not None:
+                errors["number_of_grid_points"] = "must be None when domain is provided"
+
+            if step is not None:
+                errors["step"] = "must be None when domain is provided"
+
+        if number_of_grid_points is not None and not (
+            domain is not _MISSING and domain is not None
+        ):
             if not isinstance(number_of_grid_points, int):
                 errors["number_of_grid_points"] = "must be an int or None"
             elif number_of_grid_points <= 0:
                 errors["number_of_grid_points"] = "must be positive"
 
-        if step is not None:
+        if step is not None and not (domain is not _MISSING and domain is not None):
             if not isinstance(step, (int, float, np.number)):
                 errors["step"] = "must be numeric or None"
             elif step <= 0:
@@ -284,9 +320,16 @@ class Curve:
 
     def _init_domain(
         self,
+        domain: Domain | None,
         number_of_grid_points: int | None,
         step: Number | None,
     ) -> None:
+        if domain is not None:
+            self._domain = domain
+            self.number_of_grid_points = len(domain)
+            self.step = None
+            return
+
         self.number_of_grid_points = (
             number_of_grid_points
             if number_of_grid_points is not None
@@ -452,16 +495,12 @@ class LegendTracker:
 
         if legend_trackers is not None:
             if not isinstance(legend_trackers, list):
-                errors["legend_trackers"] = (
-                    "must be a list of LegendTracker objects"
-                )
+                errors["legend_trackers"] = "must be a list of LegendTracker objects"
             elif not all(
                 isinstance(legend_tracker, LegendTracker)
                 for legend_tracker in legend_trackers
             ):
-                errors["legend_trackers"] = (
-                    "must contain only LegendTracker objects"
-                )
+                errors["legend_trackers"] = "must contain only LegendTracker objects"
 
         if kwargs:
             errors.update({name: "is not a valid argument" for name in kwargs})

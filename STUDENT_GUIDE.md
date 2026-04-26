@@ -1,39 +1,93 @@
 # AniPhys Student Guide
 
-AniPhys helps you animate mathematical or physical equations while changing one
+AniPhys helps you animate mathematical functions $f(x)$ while changing one
 or more parameters. It is meant for situations like:
 
 - How does a sine wave change when its frequency changes?
 - How does a Gaussian wave packet move as time changes?
 - How does a potential curve change when a parameter is varied?
 
-You write normal Python functions for your equations. AniPhys turns them into
-Matplotlib plots and animations.
+You express you mathematical function using python and AniPhys turns it into Matplotlib
+plots and animations.
 
 ## Basic Idea
 
-An equation function should take the plotting variable as its first argument.
-For example, this function represents
+The basic idea is best illustrated using an example. Say you want to animate the
+evolution of $\sin(kx)$ as $k$ increases $1$ to $10$ on the domain $x\in[0,2\pi]$.
 
-```text
-y(x) = sin(kx)
-```
+### 1. Define the function
+First you would have to express the function in python as below
 
 ```python
 import numpy as np
-
 
 def wave(x, k=1):
     return np.sin(k * x)
 ```
 
-Here:
+The following things are worth noticing:
+- Using numpy as generally recommended for faster rendering.
+- The python function needs at least one argument.
+- The first argument is always the domain with any additional arguments being parameters which you can animate.
 
-- `x` is the horizontal axis.
-- `k` is a parameter.
-- AniPhys can make an animation by changing `k`.
+### 2. Define the domain and parameter evolution
+In order to plot and animate the function, AniPhys requires an array of input values $x$ and
+an array of parameter values $k$. The idea is that for each entry of the parameter
+array, the function is plotted given that parameter on the domain. The resulting plots
+are then spliced together forming a moving image.
 
-## Your First Animation
+The numpy library makes very easy with the
+`np.linspace` function:
+1. Given the domain $[0,2\pi]$ we'll define $1000$ points (to make the plot look
+   smooth).
+2. Given the parameter should increase from $1$ to $10$ we'll define $120$ points (which
+   will yield an animation with $120$ frames).
+
+To make the values more intuitive we assign the variables `resolution` and `frame_count`.
+```python
+import numpy as np
+
+def wave(x, k=1):
+    return np.sin(k * x)
+
+resolution = 1000
+frame_count = 120
+
+domain = np.linspace(0, 2 * np.pi, resolution)
+parameter_evolution = np.linspace(1, 10, frame_count)
+```
+Given these building blocks the `animator` and `generate_animation` functions can now
+generate the animation. The `animator` function packages the information in the
+`domain` and `parameter_evolution` arrays with the `wave` function to yield the frames
+which are then turned into an animation by the `generate_animation` function.
+
+```python
+import numpy as np
+from aniphys.animate import animator, generate_animation
+
+def wave(x, k=1):
+    return np.sin(k * x)
+
+resolution = 1000
+frame_count = 120
+
+domain = np.linspace(0, 2 * np.pi, resolution)
+parameter_evolution = np.linspace(1, 10, frame_count)
+
+frames = animator(wave, domain=domain, k=parameter_evolution)
+animation = generate_animation(frames, show=True)
+```
+Notice the following things:
+- The `animator` function takes two types of arguments: The function to animate and the
+  parameters to vary between frames, plus an optional `domain=...` keyword.
+- The `animator` function can infer the names of the `wave` function's arguments so that
+  passing the keyword argument `k=[1,2,3,4]` makes it generate an animation with frames
+  `wave(x, k=1)`, `wave(x, k=2)`, `wave(x, k=3)`, and `wave(x, k=4)`.
+- The `generate_animation` function then takes these generated frames and turns them
+  into an animation. Passing `show=True` makes the animation immediately appear.
+
+
+## Example animation
 
 ```python
 import numpy as np
@@ -340,4 +394,3 @@ frames[0].graphs[0].axes.set_title("My animation")
 ani = generate_animation(frames)
 plt.show()
 ```
-

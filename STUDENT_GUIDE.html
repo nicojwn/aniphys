@@ -18,7 +18,8 @@
 }
 
 </style>
-            
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
 <style>
@@ -139,33 +140,86 @@
         </head>
         <body class="vscode-body vscode-light">
             <h1 id="aniphys-student-guide">AniPhys Student Guide</h1>
-<p>AniPhys helps you animate mathematical or physical equations while changing one
+<p>AniPhys helps you animate mathematical functions <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span> while changing one
 or more parameters. It is meant for situations like:</p>
 <ul>
 <li>How does a sine wave change when its frequency changes?</li>
 <li>How does a Gaussian wave packet move as time changes?</li>
 <li>How does a potential curve change when a parameter is varied?</li>
 </ul>
-<p>You write normal Python functions for your equations. AniPhys turns them into
-Matplotlib plots and animations.</p>
+<p>You express you mathematical function using python and AniPhys turns it into Matplotlib
+plots and animations.</p>
 <h2 id="basic-idea">Basic Idea</h2>
-<p>An equation function should take the plotting variable as its first argument.
-For example, this function represents</p>
-<pre><code class="language-text">y(x) = sin(kx)
-</code></pre>
+<p>The basic idea is best illustrated using an example. Say you want to animate the
+evolution of <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>sin</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>k</mi><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sin(kx)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">sin</span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="mord mathnormal">x</span><span class="mclose">)</span></span></span></span> as <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span> increases <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn></mrow><annotation encoding="application/x-tex">10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span></span></span></span> on the domain <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∈</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>2</mn><mi>π</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">x\in[0,2\pi]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mclose">]</span></span></span></span>.</p>
+<h3 id="1-define-the-function">1. Define the function</h3>
+<p>First you would have to express the function in python as below</p>
 <pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
-
 
 <span class="hljs-keyword">def</span> <span class="hljs-title function_">wave</span>(<span class="hljs-params">x, k=<span class="hljs-number">1</span></span>):
     <span class="hljs-keyword">return</span> np.sin(k * x)
 </code></pre>
-<p>Here:</p>
+<p>The following things are worth noticing:</p>
 <ul>
-<li><code>x</code> is the horizontal axis.</li>
-<li><code>k</code> is a parameter.</li>
-<li>AniPhys can make an animation by changing <code>k</code>.</li>
+<li>Using numpy as generally recommended for faster rendering.</li>
+<li>The python function needs at least one argument.</li>
+<li>The first argument is always the domain with any additional arguments being parameters which you can animate.</li>
 </ul>
-<h2 id="your-first-animation">Your First Animation</h2>
+<h3 id="2-define-the-domain-and-parameter-evolution">2. Define the domain and parameter evolution</h3>
+<p>In order to plot and animate the function, AniPhys requires an array of input values <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span></span></span></span> and
+an array of parameter values <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.03148em;">k</span></span></span></span>. The idea is that for each entry of the parameter
+array, the function is plotted given that parameter on the domain. The resulting plots
+are then spliced together forming a moving image.</p>
+<p>The numpy library makes very easy with the
+<code>np.linspace</code> function:</p>
+<ol>
+<li>Given the domain <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>2</mn><mi>π</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,2\pi]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.03588em;">π</span><span class="mclose">]</span></span></span></span> we'll define <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1000</mn></mrow><annotation encoding="application/x-tex">1000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1000</span></span></span></span> points (to make the plot look
+smooth).</li>
+<li>Given the parameter should increase from <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span> to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10</mn></mrow><annotation encoding="application/x-tex">10</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">10</span></span></span></span> we'll define <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>120</mn></mrow><annotation encoding="application/x-tex">120</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">120</span></span></span></span> points (which
+will yield an animation with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>120</mn></mrow><annotation encoding="application/x-tex">120</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">120</span></span></span></span> frames).</li>
+</ol>
+<p>To make the values more intuitive we assign the variables <code>resolution</code> and <code>frame_count</code>.</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">wave</span>(<span class="hljs-params">x, k=<span class="hljs-number">1</span></span>):
+    <span class="hljs-keyword">return</span> np.sin(k * x)
+
+resolution = <span class="hljs-number">1000</span>
+frame_count = <span class="hljs-number">120</span>
+
+domain = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, resolution)
+parameter_evolution = np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>, frame_count)
+</code></pre>
+<p>Given these building blocks the <code>animator</code> and <code>generate_animation</code> functions can now
+generate the animation. The <code>animator</code> function packages the information in the
+<code>domain</code> and <code>parameter_evolution</code> arrays with the <code>wave</code> function to yield the frames
+which are then turned into an animation by the <code>generate_animation</code> function.</p>
+<pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
+<span class="hljs-keyword">from</span> aniphys.animate <span class="hljs-keyword">import</span> animator, generate_animation
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">wave</span>(<span class="hljs-params">x, k=<span class="hljs-number">1</span></span>):
+    <span class="hljs-keyword">return</span> np.sin(k * x)
+
+resolution = <span class="hljs-number">1000</span>
+frame_count = <span class="hljs-number">120</span>
+
+domain = np.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">2</span> * np.pi, resolution)
+parameter_evolution = np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">10</span>, frame_count)
+
+frames = animator(wave, k=parameter_evolution)
+animation = generate_animation(frames, show=<span class="hljs-literal">True</span>)
+</code></pre>
+<p>Notice the following things:</p>
+<ul>
+<li>The <code>animator</code> function takes two types of arguments: The function to animate and the
+parameters to vary between frames.</li>
+<li>The <code>animator</code> function can infer the names of the <code>wave</code> function's arguments so that
+passing the keyword argument <code>k=[1,2,3,4]</code> makes it generate an animation with frames
+<code>wave(x, k=1)</code>, <code>wave(x, k=2)</code>, <code>wave(x, k=3)</code>, and <code>wave(x, k=4)</code>.</li>
+<li>The <code>generate_animation</code> function then takes these generated frames and turns them
+into an animation. Passing <code>show=True</code> makes the animation immediately appear.</li>
+</ul>
+<h2 id="example-animation">Example animation</h2>
 <pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
 <span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
 
@@ -400,7 +454,7 @@ ani = generate_animation(frames)
 plt.show()
 </code></pre>
 
-            
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
             
         </body>
         </html>

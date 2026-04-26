@@ -139,32 +139,22 @@
         </head>
         <body class="vscode-body vscode-light">
             <h1 id="aniphys">AniPhys</h1>
-<p>AniPhys is a small Python library for animating mathematical and physical
-equations with Matplotlib.</p>
-<p>It is designed for students who want to visualize how equations change when
-parameters such as time, frequency, width, or amplitude are varied.</p>
+<p>AniPhys is a small Python library for animating mathematical equations with Matplotlib.
+It is designed for students who want to visualize how equations change when parameters
+such as time, frequency, width, or amplitude are varied.</p>
 <h2 id="installation">Installation</h2>
-<p>Install directly from a local checkout:</p>
+<p>From the Git repository:</p>
+<pre><code class="language-bash">pip install <span class="hljs-string">&quot;git+https://github.com/nicojwn/aniphys.git&quot;</span>
+</code></pre>
+<p>Directly from a local checkout:</p>
 <pre><code class="language-bash"><span class="hljs-built_in">cd</span> aniphys
 pip install .
 </code></pre>
-<p>For editable development:</p>
-<pre><code class="language-bash"><span class="hljs-built_in">cd</span> aniphys
-pip install -e .
-</code></pre>
-<p>With <code>uv</code>:</p>
-<pre><code class="language-bash"><span class="hljs-built_in">cd</span> aniphys
-uv <span class="hljs-built_in">sync</span>
-</code></pre>
-<p>From a Git repository:</p>
-<pre><code class="language-bash">pip install <span class="hljs-string">&quot;git+https://github.com/nicojwn/aniphys.git&quot;</span>
-</code></pre>
-<p>Replace <code>USER/REPO</code> with the actual repository path.</p>
 <h2 id="minimal-example">Minimal Example</h2>
 <pre><code class="language-python"><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np
 <span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt
 
-<span class="hljs-keyword">from</span> aniphys.animation_logic <span class="hljs-keyword">import</span> animator, generate_animation
+<span class="hljs-keyword">from</span> aniphys <span class="hljs-keyword">import</span> animator, generate_animation
 
 
 <span class="hljs-keyword">def</span> <span class="hljs-title function_">wave</span>(<span class="hljs-params">x, k=<span class="hljs-number">1</span></span>):
@@ -172,9 +162,7 @@ uv <span class="hljs-built_in">sync</span>
 
 
 frames = animator(wave, k=np.linspace(<span class="hljs-number">1</span>, <span class="hljs-number">5</span>, <span class="hljs-number">80</span>))
-ani = generate_animation(frames)
-
-plt.show()
+ani = generate_animation(frames, show=<span class="hljs-literal">True</span>)
 </code></pre>
 <h2 id="documentation">Documentation</h2>
 <ul>

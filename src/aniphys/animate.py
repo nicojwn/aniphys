@@ -1,4 +1,4 @@
-# aniphys/animation_logic.py
+# aniphys/animate.py
 
 
 from __future__ import annotations
@@ -12,11 +12,19 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.artist import Artist
 from tqdm import tqdm
 
-from aniphys.frame_objects import Curve, Graph, GraphMatrix, LegendTracker
+from aniphys.frame_objects import (
+    Curve,
+    Graph,
+    GraphMatrix,
+    LegendTracker,
+    _normalize_domain,
+)
+from aniphys.type_defs import ArrayLike1D, Domain
 
 
 def animator(
     *equations: Callable[..., Any] | list[Callable[..., Any]],
+    domain: ArrayLike1D | None = None,
     legend_trackers: list[LegendTracker] | None = None,
     **equation_parameters: Any,
 ) -> list[GraphMatrix]:
@@ -24,11 +32,14 @@ def animator(
     Build a sequence of `GraphMatrix` frames from equations and frame parameters.
 
     Each positional callable becomes one graph with one curve. Each positional
-    list of callables becomes one graph with multiple curves. Keyword arguments
-    are applied to every curve whose equation exposes a matching parameter name.
+    list of callables becomes one graph with multiple curves. `domain`, when
+    provided, is used as the shared x-domain for every generated curve. Keyword
+    arguments are applied to every curve whose equation exposes a matching
+    parameter name.
     """
 
     graph_specs = _normalize_equation_specs(equations)
+    normalized_domain = _normalize_animator_domain(domain)
     _validate_legend_trackers(legend_trackers)
     parameter_frames = _normalize_parameter_frames(
         graph_specs,
@@ -45,6 +56,7 @@ def animator(
             for curve_idx, equation in enumerate(equations_for_graph):
                 curve = Curve(
                     equation,
+                    domain=normalized_domain,
                     validate_equation=False,
                     label=f"curve_{graph_idx}_{curve_idx}",
                 )
@@ -70,7 +82,19 @@ def animator(
     return graph_matrices
 
 
-def generate_animation(
+def _normalize_animator_domain(domain: ArrayLike1D | None) -> Domain | None:
+    if domain is None:
+        return None
+
+    try:
+        return _normalize_domain(domain)
+    except ValueError as exc:
+        raise ValueError(
+            "Please check the following arguments: domain -> " + str(exc)
+        ) from exc
+
+
+def _generate_animation(
     graph_matrices: list[GraphMatrix],
     fps: int = 60,
     suppress_progress_bar: bool = False,
@@ -87,22 +111,24 @@ def generate_animation(
     display_matrix = graph_matrices[0]
     frames = graph_matrices[1:] or graph_matrices
 
-    for matrix in graph_matrices:
-        matrix.update_graphs()
-
-    _apply_global_axis_limits(display_matrix, graph_matrices)
-
     changed_artists = _collect_changed_artists(display_matrix)
 
-    progress_bar = None
-    if not suppress_progress_bar:
-        progress_bar = tqdm(
-            total=len(frames) + 1,
-            desc="Animating frames",
+    if suppress_progress_bar:
+        for matrix in graph_matrices:
+            matrix.update_graphs()
+    else:
+        with tqdm(
+            total=len(graph_matrices),
+            desc="Computing frames",
             ncols=80,
             mininterval=0.1,
             unit="frames",
-        )
+        ) as progress_bar:
+            for matrix in graph_matrices:
+                matrix.update_graphs()
+                progress_bar.update()
+
+    _apply_global_axis_limits(display_matrix, graph_matrices)
 
     def init_animation() -> tuple[Artist, ...]:
         """
@@ -116,9 +142,6 @@ def generate_animation(
             for curve in graph.curves:
                 curve.line.set_ydata(np.ma.array(curve.line.get_ydata(), mask=True))
 
-        if progress_bar is not None:
-            progress_bar.update()
-
         return changed_artists
 
     def animate(frame: GraphMatrix) -> tuple[Artist, ...]:
@@ -128,12 +151,6 @@ def generate_animation(
 
         _copy_frame_data(display_matrix, frame)
         _copy_legend_labels(display_matrix, frame)
-
-        if progress_bar is not None:
-            progress_bar.update()
-
-            if progress_bar.n >= progress_bar.total:
-                progress_bar.close()
 
         return changed_artists
 
@@ -150,13 +167,32 @@ def generate_animation(
     )
 
 
+def generate_animation(
+    graph_matrices: list[GraphMatrix],
+    fps: int = 60,
+    suppress_progress_bar: bool = False,
+    show: bool = True,
+) -> FuncAnimation:
+    if not isinstance(show, bool):
+        raise ValueError("show must be a boolean")
+
+    ani = _generate_animation(
+        graph_matrices=graph_matrices,
+        fps=fps,
+        suppress_progress_bar=suppress_progress_bar,
+    )
+
+    if show:
+        plt.show()
+
+    return ani
+
+
 def _normalize_equation_specs(
     equations: tuple[Callable[..., Any] | list[Callable[..., Any]], ...],
 ) -> list[list[Callable[..., Any]]]:
     if not equations:
-        raise ValueError(
-            "animator requires at least one callable or list of callables"
-        )
+        raise ValueError("animator requires at least one callable or list of callables")
 
     graph_specs: list[list[Callable[..., Any]]] = []
     errors: dict[str, str] = {}
@@ -180,9 +216,7 @@ def _normalize_equation_specs(
     if errors:
         raise ValueError(
             "Please check the following arguments: "
-            + "; ".join(
-                f"{argument} -> {error}" for argument, error in errors.items()
-            )
+            + "; ".join(f"{argument} -> {error}" for argument, error in errors.items())
         )
 
     return graph_specs
@@ -216,8 +250,7 @@ def _normalize_parameter_frames(
     unknown_parameters = set(equation_parameters) - accepted_parameter_names
     if unknown_parameters:
         raise ValueError(
-            "Unknown equation parameters: "
-            + ", ".join(sorted(unknown_parameters))
+            "Unknown equation parameters: " + ", ".join(sorted(unknown_parameters))
         )
 
     frame_parameters: dict[str, list[Any] | Any] = {}
@@ -381,5 +414,3 @@ def _copy_legend_labels(display_matrix: GraphMatrix, frame: GraphMatrix) -> None
 
         for text, label in zip(display_graph.legend.get_texts(), labels):
             text.set_text(label)
-
-
