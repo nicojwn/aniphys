@@ -5,6 +5,7 @@ from aniphys.animate import animator, generate_animation
 # Prerequisites:
 # - 01_minimal_template.py: basic animator/generate_animation usage and display behavior.
 
+
 # AniPhys calls the equation with the current x-domain as the first argument.
 def wave(x, k=1):
     return np.sin(k * x)

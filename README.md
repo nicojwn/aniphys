@@ -34,8 +34,12 @@ def wave(x, k=1):
 
 domain = np.linspace(0, 2 * np.pi, 1000)
 frames = animator(wave, domain=domain, k=np.linspace(1, 5, 80))
+
+
 animation = generate_animation(frames, show=True)
 ```
+
+![Example](readme_example.gif)
 
 ## Display Behavior
 
